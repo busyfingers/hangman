@@ -5,6 +5,7 @@ type Letter = {
   guessed: boolean;
 };
 
+let guesses = 10;
 const notInWord = [] as string[];
 
 const rl = readline.createInterface({
@@ -17,8 +18,6 @@ const drawHints = (word: Letter[]) => {
     word.map((letter) => (letter.guessed ? letter.value : "_")).join(" ") + "\n"
   );
 };
-
-const print = (text: string) => process.stdout.write(`{}`);
 
 const clearScreen = () => process.stdout.write("\x1B[2J\x1B[0f");
 
@@ -47,11 +46,19 @@ const getWord = (maxLength?: number): Letter[] => {
 
 const drawNotinWord = (notInWord: string[]) => {
   notInWord.length &&
-    process.stdout.write(`Finns inte i ordet: ${notInWord.join(" ")}`);
+    process.stdout.write(
+      `Finns inte i ordet: ${notInWord.join(
+        " "
+      )}\nGissningar kvar: ${guesses}\n`
+    );
 };
 
 const drawWinScreen = () => {
   process.stdout.write("\n\u001b[32mDu vann! Bra jobbat!\n");
+};
+
+const drawLoseScreen = () => {
+  process.stdout.write("\n\u001b[31mDu förlorade :( Försök igen!\n");
 };
 
 const drawGameScreen = () => {
@@ -65,10 +72,17 @@ const drawGameScreen = () => {
 
 const prompt = () => {
   drawGameScreen();
+
+  if (guesses === 0) {
+    drawLoseScreen();
+    return rl.close();
+  }
+
   if (word.every((l) => l.guessed)) {
     drawWinScreen();
     return rl.close();
   }
+
   rl.question(`Gissa bokstav: `, (guess) => {
     let inWord = false;
 
@@ -79,7 +93,10 @@ const prompt = () => {
       }
     });
 
-    !inWord && notInWord.push(guess.toUpperCase());
+    if (!inWord) {
+      notInWord.push(guess.toUpperCase());
+      guesses--;
+    }
 
     prompt();
   });
