@@ -5,6 +5,12 @@ type Letter = {
   guessed: boolean;
 };
 
+type Word = {
+  letters: Letter[];
+  clue: string;
+};
+
+let showClue = false;
 let guesses = 10;
 const notInWord = [] as string[];
 
@@ -15,42 +21,63 @@ const rl = readline.createInterface({
 
 const drawHints = (word: Letter[]) => {
   process.stdout.write(
-    word.map((letter) => (letter.guessed ? letter.value : "_")).join(" ") + "\n"
+    word
+      .map((letter) =>
+        letter.guessed || letter.value === " " ? letter.value : "_"
+      )
+      .join(" ") + "\n"
   );
 };
 
 const clearScreen = () => process.stdout.write("\x1B[2J\x1B[0f");
 
-const getWord = (maxLength?: number): Letter[] => {
+const getWord = (maxLength?: number): Word => {
   const words = [
-    "BANAN",
-    "BIL",
-    "PRINSESSA",
-    "ÄPPLE",
-    "ENHÖRNING",
-    "BOK",
-    "SPIDERMAN",
-    "PAWPATROL",
-    "ROSA",
-    "TÅRTA",
-    "BRANDBIL",
+    {
+      value: "BANAN",
+      clue: "Gul och böjd",
+    },
+    { value: "BIL", clue: "Kör på vägar" },
+    { value: "PRINSESSA", clue: "Ska bli drottning" },
+    { value: "ÄPPLE", clue: "Frukt som kan vara röd och grön" },
+    { value: "ENHÖRNING", clue: "Djur med fyra ben och horn i pannan" },
+    { value: "BOK", clue: "Man kan låna såna på biblioteket" },
+
+    { value: "SPIDERMAN", clue: "Kvarterets vänlige superhjälte" },
+    { value: "PAW PATROL", clue: "Hundvalpar som räddar och hjälper till" },
+
+    { value: "ROSA", clue: "Iris favoritfärg" },
+
+    { value: "TÅRTA", clue: "Gott som man äter på födelsedagar" },
+    {
+      value: "BRANDBIL",
+      clue: "Kommer körande snabbt ifall det börjar brinna",
+    },
   ];
-  const picked = maxLength ? words.filter((w) => w.length <= maxLength) : words;
-  return picked[Math.floor(Math.random() * words.length)]
-    .split("")
-    .reduce(
-      (res, char) => [...res, { value: char, guessed: false }],
-      [] as Letter[]
-    );
+  const wordPool = maxLength
+    ? words.filter((w) => w.value.length <= maxLength)
+    : words;
+  const picked = wordPool[Math.floor(Math.random() * words.length)];
+  return {
+    clue: picked.clue,
+    letters: picked.value
+      .split("")
+      .reduce(
+        (res, char) => [...res, { value: char, guessed: char === " " }],
+        [] as Letter[]
+      ),
+  };
 };
 
 const drawNotinWord = (notInWord: string[]) => {
   notInWord.length &&
     process.stdout.write(
-      `Finns inte i ordet: ${notInWord.join(
-        " "
-      )}\nGissningar kvar: ${guesses}\n`
+      `Finns inte i ordet: ${notInWord.join(" ")}\nChanser kvar: ${guesses}\n`
     );
+};
+
+const drawClue = () => {
+  process.stdout.write(`Ledtråd: ${word.clue}`);
 };
 
 const drawWinScreen = () => {
@@ -64,9 +91,11 @@ const drawLoseScreen = () => {
 const drawGameScreen = () => {
   clearScreen();
   process.stdout.write("\n");
-  drawHints(word);
+  drawHints(word.letters);
   process.stdout.write("\n");
   drawNotinWord(notInWord);
+  process.stdout.write("\n");
+  showClue && drawClue();
   process.stdout.write("\n");
 };
 
@@ -78,23 +107,31 @@ const prompt = () => {
     return rl.close();
   }
 
-  if (word.every((l) => l.guessed)) {
+  if (word.letters.every((l) => l.guessed)) {
     drawWinScreen();
     return rl.close();
   }
 
+  rl.question(`Gissa bokstav: `, (userInput) => {
     const guess = userInput.toUpperCase()[0];
     let inWord = false;
 
-    word.forEach((l) => {
-      if (l.value.toUpperCase() === guess.toUpperCase()) {
-        l.guessed = true;
-        inWord = true;
-      }
-    });
+    if (guess === ".") {
+      showClue = true;
+      return prompt();
+    }
 
-    if (!inWord) {
-      notInWord.push(guess.toUpperCase());
+    word.letters
+      .filter((w) => w.value !== " ")
+      .forEach((l) => {
+        if (l.value.toUpperCase() === guess) {
+          l.guessed = true;
+          inWord = true;
+        }
+      });
+
+    if (!inWord && !notInWord.includes(guess) && guess) {
+      notInWord.push(guess);
       guesses--;
     }
 
