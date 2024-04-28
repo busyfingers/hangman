@@ -83,7 +83,7 @@ const prompt = () => {
     return rl.close();
   }
 
-  rl.question(`Gissa bokstav: `, (guess) => {
+    const guess = userInput.toUpperCase()[0];
     let inWord = false;
 
     word.forEach((l) => {
