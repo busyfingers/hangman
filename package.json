@@ -2,6 +2,15 @@
   "name": "hangman",
   "packageManager": "yarn@4.1.1",
   "type": "module",
+  "scripts": {
+    "build": "yarn tsc && cp words.json dist",
+    "dev": "tsx app.ts",
+    "dev:local": "tsx app.ts local",
+    "dev:server": "tsx server.ts",
+    "start": "node dist/app.js",
+    "start:local": "node dist/app.js local",
+    "start:server": "node dist/server.js"
+  },
   "devDependencies": {
     "@types/node": "^20.12.7",
     "tsx": "^4.19.1",
