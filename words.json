@@ -1,0 +1,34 @@
+[
+  {
+    "value": "BANAN",
+    "clue": "Gul och böjd"
+  },
+  { "value": "BIL", "clue": "Kör på vägar" },
+  { "value": "PRINSESSA", "clue": "Ska bli drottning" },
+  { "value": "ÄPPLE", "clue": "Frukt som kan vara röd och grön" },
+  { "value": "ENHÖRNING", "clue": "Djur med fyra ben och horn i pannan" },
+  { "value": "BOK", "clue": "Man kan låna såna på biblioteket" },
+
+  { "value": "SPIDERMAN", "clue": "Kvarterets vänlige superhjälte" },
+  { "value": "PAW PATROL", "clue": "Hundvalpar som räddar och hjälper till" },
+
+  { "value": "ROSA", "clue": "Iris favoritfärg" },
+
+  { "value": "TÅRTA", "clue": "Gott som man äter på födelsedagar" },
+  {
+    "value": "BRANDBIL",
+    "clue": "Kommer körande snabbt ifall det börjar brinna"
+  },
+  {
+    "value": "STUDSMATTA",
+    "clue": "Gör att man hoppar högt"
+  },
+  {
+    "value": "FIL",
+    "clue": "Gott till frukost"
+  },
+  {
+    "value": "SKOLA",
+    "clue": "Ställe där man lär sig saker"
+  }
+]

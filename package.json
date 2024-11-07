@@ -1,6 +1,7 @@
 {
   "name": "hangman",
   "packageManager": "yarn@4.1.1",
+  "type": "module",
   "devDependencies": {
     "@types/node": "^20.12.7",
     "tsx": "^4.19.1",

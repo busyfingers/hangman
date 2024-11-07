@@ -1,4 +1,7 @@
-import readline from "node:readline";
+import { createInterface } from "node:readline";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+// const words = require("./words.json") as RawWordData[];
 
 type Letter = {
   value: string;
@@ -10,11 +13,17 @@ type Word = {
   clue: string;
 };
 
+type RawWordData = {
+  value: string;
+  clue: string;
+};
+
+let word = undefined;
 let showClue = false;
 let guesses = 10;
 const notInWord = [] as string[];
 
-const rl = readline.createInterface({
+const rl = createInterface({
   input: process.stdin,
   output: process.stdout,
 });
@@ -31,36 +40,31 @@ const drawHints = (word: Letter[]) => {
 
 const clearScreen = () => process.stdout.write("\x1B[2J\x1B[0f");
 
-const getWord = (maxLength?: number): Word => {
-  const words = [
-    {
-      value: "BANAN",
-      clue: "Gul och böjd",
-    },
-    { value: "BIL", clue: "Kör på vägar" },
-    { value: "PRINSESSA", clue: "Ska bli drottning" },
-    { value: "ÄPPLE", clue: "Frukt som kan vara röd och grön" },
-    { value: "ENHÖRNING", clue: "Djur med fyra ben och horn i pannan" },
-    { value: "BOK", clue: "Man kan låna såna på biblioteket" },
+const getWord = async (maxLength?: number): Promise<Word> => {
+  let word = null as RawWordData;
+  console.log(process.argv);
+  if (process.argv.length > 2 && process.argv[2] === "local") {
+    const words = require("./words.json") as RawWordData[];
+    word = words[Math.floor(Math.random() * words.length - 1)];
+  } else {
+    const res = await fetch(
+      `http://localhost:5062/random${
+        maxLength ? "?maxLength=" + maxLength : ""
+      }`
+    );
 
-    { value: "SPIDERMAN", clue: "Kvarterets vänlige superhjälte" },
-    { value: "PAW PATROL", clue: "Hundvalpar som räddar och hjälper till" },
+    word = (await res.json()) as RawWordData;
+  }
 
-    { value: "ROSA", clue: "Iris favoritfärg" },
+  console.log(word);
 
-    { value: "TÅRTA", clue: "Gott som man äter på födelsedagar" },
-    {
-      value: "BRANDBIL",
-      clue: "Kommer körande snabbt ifall det börjar brinna",
-    },
-  ];
-  const wordPool = maxLength
-    ? words.filter((w) => w.value.length <= maxLength)
-    : words;
-  const picked = wordPool[Math.floor(Math.random() * words.length)];
+  // const wordPool = maxLength
+  //   ? words.filter((w) => w.value.length <= maxLength)
+  //   : words;
+  // const picked = wordPool[Math.floor(Math.random() * words.length)];
   return {
-    clue: picked.clue,
-    letters: picked.value
+    clue: word.clue,
+    letters: word.value
       .split("")
       .reduce(
         (res, char) => [...res, { value: char, guessed: char === " " }],
@@ -139,12 +143,11 @@ const prompt = () => {
   });
 };
 
-const word = getWord();
-
 clearScreen();
 process.stdout.write(
   "Hej och välkommen till hänga gubbe!\n\nTryck på en knapp för att starta spelet"
 );
-process.stdin.once("data", () => {
+process.stdin.once("data", async () => {
+  word = await getWord();
   prompt();
 });
